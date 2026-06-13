@@ -62,6 +62,17 @@ instruction) → SIGSEGV** the moment they execute one — *before the app even 
 Starting Colima with **`--cpu-type max`** makes the emulated CPU advertise the **full
 host-derived flag set**, so those instructions are valid.
 
+> **Verified:** a generic amd64 container on a `--cpu-type max` VM reports
+> `popcnt sse4_1 sse4_2 avx` in `/proc/cpuinfo` —
+> ```
+> $ docker run --rm --platform linux/amd64 busybox \
+>     sh -c 'grep -oE "popcnt|sse4_2|sse4_1|avx" /proc/cpuinfo | sort -u'
+> avx  popcnt  sse4_1  sse4_2
+> ```
+> i.e. the exact flags a default emulation VM omits are present here. (The `stdin_open`
+> half is standard `docker run -i` behaviour: a `read` on a closed stdin returns EOF
+> immediately; with an open stdin it blocks for input.)
+
 ### 2 · `stdin_open: true` on the service — fixes exit 139 at *teardown*
 
 An interactive-console binary starts **reading stdin the instant it goes interactive** (right

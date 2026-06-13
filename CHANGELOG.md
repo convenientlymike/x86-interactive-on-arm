@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial recipe for running x86-only interactive-console server binaries on Apple
   Silicon (arm64) via Colima + Docker Compose.
+- README "Verified" note: confirmed generically that a `--cpu-type max` VM advertises
+  `popcnt sse4_1 sse4_2 avx` to an amd64 container (the flags a default VM omits).
 - Documents two independent, deterministic failure modes hiding behind a single exit 139:
   (1) startup SIGILL/SIGSEGV from a conservative baseline CPU missing POPCNT/SSE4.2,
   fixed with `colima start --cpu-type max`; and (2) teardown fault from an interactive
