@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same branch/PR to avoid wasting runner minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint & validate
+    runs-on: ubuntu-latest
+
+    # NOTE: The Apple-Silicon x86 emulation target (Colima + QEMU on arm64) cannot
+    # be exercised on a hosted Linux runner. CI here only lints the shell scripts
+    # and validates the compose file syntax — it does not attempt a real boot.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint shell scripts
+        run: shellcheck scripts/*.sh
+
+      - name: Validate docker-compose.yml
+        run: docker compose config -q

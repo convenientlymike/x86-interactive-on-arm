@@ -1,0 +1,34 @@
+# docker-compose.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Template — swap in your own x86_64-only image and adapt ports/volumes/env
+# to your binary. The two load-bearing fields are `platform: linux/amd64` and
+# `stdin_open: true` (see README). Both are required; either alone still fails.
+# (--cpu-type max is a Colima VM-start flag, NOT a compose field — see README.)
+# ─────────────────────────────────────────────────────────────────────────────
+name: x86-interactive
+
+services:
+  app:
+    # Swap for your own x86_64-only image. (`build:` works too.)
+    image: ${APP_IMAGE:-your/x86-only-interactive-server:latest}
+
+    # (a) Force the amd64 variant. On Apple Silicon this routes the container
+    #     through the Colima x86_64 VM's emulation; a no-op on a native x86_64 host.
+    platform: linux/amd64
+
+    # (b) Keep stdin open (the `docker run -i` equivalent). An interactive console
+    #     reads stdin as soon as it goes interactive; without an open stdin it hits
+    #     EOF, treats the console as closed, quits, and the runtime faults on
+    #     teardown → a phantom exit 139 that masquerades as an emulation SIGSEGV.
+    #     Do NOT also set `tty: true` when compose is driven from a non-TTY pipe —
+    #     it errors "the input device is not a TTY".
+    stdin_open: true
+
+    # Example wiring — replace with your binary's real needs. No secrets inline;
+    # inject any real credentials from the environment / a secret store, never here.
+    # ports:
+    #   - "127.0.0.1:8080:8080"
+    # environment:
+    #   APP_OPT: ${APP_OPT:-}
+    # volumes:
+    #   - ./data:/data
